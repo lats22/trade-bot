@@ -1,0 +1,45 @@
+services:
+  frontend:
+    build: ./frontend
+    container_name: trade-bot-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  backend:
+    build: ./backend
+    container_name: trade-bot-backend
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    environment:
+      - ALPHA_VANTAGE_API_KEY=${ALPHA_VANTAGE_API_KEY:?ALPHA_VANTAGE_API_KEY is required}
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.52.0-noble
+    container_name: trade-bot-playwright
+    working_dir: /app
+    entrypoint: npx
+    command: ["@playwright/mcp@latest", "--port", "8934", "--host", "0.0.0.0"]
+    ports:
+      - "${PLAYWRIGHT_PORT:-8934}:8934"
+    depends_on:
+      - frontend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

@@ -2,7 +2,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import health
+from app.api import health, backtest
 
 app = FastAPI(
     title="Trade_Bot API",
@@ -19,6 +19,7 @@ app.add_middleware(
 )
 
 app.include_router(health.router, prefix="/api", tags=["health"])
+app.include_router(backtest.router, prefix="/api", tags=["backtest"])
 
 
 @app.get("/")

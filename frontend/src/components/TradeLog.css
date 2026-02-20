@@ -1,0 +1,97 @@
+.trade-log {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.trade-log.empty {
+  min-height: 150px;
+}
+
+.trade-log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.trade-log-header h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.trade-log-header button {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-color);
+  color: var(--text-color);
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.trade-log-header button:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: white;
+}
+
+.trade-log-header button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.empty-message {
+  color: var(--text-color);
+  opacity: 0.6;
+  text-align: center;
+  padding: 2rem;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+th, td {
+  padding: 0.5rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--text-color);
+  opacity: 0.7;
+}
+
+.trade-type {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.positive {
+  color: var(--success-color);
+}
+
+.negative {
+  color: var(--danger-color);
+}
+
+@media screen and (max-width: 576px) {
+  table {
+    font-size: 0.75rem;
+  }
+
+  th, td {
+    padding: 0.375rem;
+  }
+}

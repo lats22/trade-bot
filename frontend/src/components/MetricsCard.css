@@ -38,6 +38,19 @@
   color: var(--text-color);
   opacity: 0.7;
   margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.metric-label .tooltip-container {
+  margin-left: 0.25rem;
+}
+
+.metric-label .tooltip-trigger {
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
 }
 
 .metric-value {

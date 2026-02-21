@@ -20,8 +20,8 @@ class VWAPMAVolumeStrategy(bt.Strategy):
 
     params = (
         ("vwap_period", 14),
-        ("ma_period", 200),
-        ("volume_period", 20),
+        ("ma_period", 20),  # Reduced from 200 for limited data
+        ("volume_period", 10),  # Reduced from 20 for limited data
         ("volume_mult", 1.5),
         ("stop_loss", 0.02),
         ("take_profit", 0.04),
@@ -62,14 +62,16 @@ class VWAPMAVolumeStrategy(bt.Strategy):
     def notify_trade(self, trade):
         """Handle trade notifications."""
         if trade.isclosed:
+            size = abs(trade.size) if trade.size != 0 else 1
+            entry_value = trade.price * size if trade.price and size else 1
             self.trades.append({
                 "entry_date": bt.num2date(trade.dtopen),
                 "exit_date": bt.num2date(trade.dtclose),
                 "entry_price": trade.price,
-                "exit_price": trade.price + trade.pnl / trade.size,
-                "size": trade.size,
+                "exit_price": trade.price + (trade.pnl / size) if size else trade.price,
+                "size": size,
                 "pnl": trade.pnl,
-                "pnl_percent": (trade.pnl / (trade.price * abs(trade.size))) * 100,
+                "pnl_percent": (trade.pnl / entry_value) * 100 if entry_value else 0,
             })
 
     def next(self):

@@ -1,4 +1,5 @@
 """Backtest API endpoints."""
+import traceback
 from fastapi import APIRouter, HTTPException
 
 from app.backtest.runner import run_backtest
@@ -20,6 +21,7 @@ async def create_backtest(request: BacktestRequest) -> BacktestResponse:
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
+        print(f"Backtest error: {traceback.format_exc()}")
         raise HTTPException(status_code=500, detail=f"Backtest failed: {str(e)}")
 
 

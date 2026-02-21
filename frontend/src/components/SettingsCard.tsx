@@ -75,9 +75,7 @@ export function SettingsCard({
                 value={settings.timeframe}
                 onChange={(e) => updateSetting('timeframe', e.target.value)}
               >
-                <option value="15min">15 min</option>
-                <option value="30min">30 min</option>
-                <option value="60min">1 hour</option>
+                <option value="daily">Daily</option>
               </select>
             </div>
           </div>

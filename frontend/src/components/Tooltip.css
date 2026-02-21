@@ -1,17 +1,17 @@
 .tooltip-container {
   position: relative;
   display: inline-block;
-  margin-left: 0.5rem;
+  margin-left: 0.25rem;
 }
 
 .tooltip-trigger {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   border: 1px solid var(--border-color);
   background: var(--card-bg);
   color: var(--text-color);
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -24,27 +24,19 @@
 }
 
 .tooltip-content {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  padding: 0.5rem;
-  font-size: 0.875rem;
-  width: 200px;
-  z-index: 100;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  margin-bottom: 0.5rem;
-}
-
-.tooltip-content::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border: 6px solid transparent;
-  border-top-color: var(--border-color);
+  position: fixed;
+  background: #1a1a1a;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  width: 250px;
+  max-width: 90vw;
+  z-index: 9999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  color: #e0e0e0;
+  text-transform: none;
+  font-weight: normal;
+  text-align: left;
 }

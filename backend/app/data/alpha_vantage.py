@@ -1,6 +1,6 @@
 """Alpha Vantage API client for fetching stock data."""
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -22,32 +22,30 @@ class AlphaVantageClient:
             raise ValueError("ALPHA_VANTAGE_API_KEY not set")
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
-    def _get_cache_path(self, ticker: str, timeframe: str, month: str) -> Path:
+    def _get_cache_path(self, ticker: str, timeframe: str) -> Path:
         """Get cache file path."""
-        return CACHE_DIR / f"{ticker}_{timeframe}_{month}.csv"
+        return CACHE_DIR / f"{ticker}_{timeframe}_daily.csv"
 
-    def _fetch_intraday(
-        self, ticker: str, interval: str, month: str
-    ) -> pd.DataFrame:
-        """Fetch intraday data from API."""
+    def _fetch_daily(self, ticker: str) -> pd.DataFrame:
+        """Fetch daily data from API (free tier - last 100 days)."""
         params = {
-            "function": "TIME_SERIES_INTRADAY",
+            "function": "TIME_SERIES_DAILY",
             "symbol": ticker,
-            "interval": interval,
-            "month": month,
-            "outputsize": "full",
+            "outputsize": "compact",
             "apikey": self.api_key,
         }
         response = requests.get(self.BASE_URL, params=params, timeout=30)
         response.raise_for_status()
         data = response.json()
 
-        time_series_key = f"Time Series ({interval})"
+        time_series_key = "Time Series (Daily)"
         if time_series_key not in data:
             if "Note" in data:
                 raise ValueError(f"API limit reached: {data['Note']}")
             if "Error Message" in data:
                 raise ValueError(f"API error: {data['Error Message']}")
+            if "Information" in data:
+                raise ValueError(f"API info: {data['Information']}")
             raise ValueError(f"Unexpected response: {data}")
 
         records = []
@@ -74,51 +72,39 @@ class AlphaVantageClient:
         end_date: datetime,
     ) -> StockData:
         """
-        Get intraday data for a ticker.
+        Get daily data for a ticker (free tier uses daily data).
 
         Args:
             ticker: Stock symbol (e.g., "AAPL")
-            interval: Candle interval ("15min", "30min", "60min")
+            interval: Ignored for free tier, uses daily data
             start_date: Start of date range
             end_date: End of date range
 
         Returns:
             StockData with OHLCV bars
         """
-        all_bars = []
+        cache_path = self._get_cache_path(ticker, "daily")
 
-        # Alpha Vantage uses month format YYYY-MM
-        current = start_date.replace(day=1)
-        end_month = end_date.replace(day=1)
+        # Check cache freshness (refresh if older than 1 day)
+        use_cache = False
+        if cache_path.exists():
+            cache_age = datetime.now().timestamp() - cache_path.stat().st_mtime
+            if cache_age < 86400:  # 24 hours
+                use_cache = True
 
-        while current <= end_month:
-            month_str = current.strftime("%Y-%m")
-            cache_path = self._get_cache_path(ticker, interval, month_str)
+        if use_cache:
+            df = pd.read_csv(cache_path, parse_dates=["datetime"])
+        else:
+            df = self._fetch_daily(ticker)
+            df.to_csv(cache_path, index=False)
 
-            if cache_path.exists():
-                df = pd.read_csv(cache_path, parse_dates=["datetime"])
-            else:
-                df = self._fetch_intraday(ticker, interval, month_str)
-                df.to_csv(cache_path, index=False)
-
-            all_bars.append(df)
-
-            # Move to next month
-            if current.month == 12:
-                current = current.replace(year=current.year + 1, month=1)
-            else:
-                current = current.replace(month=current.month + 1)
-
-        if not all_bars:
-            return StockData(ticker=ticker, timeframe=interval, bars=[])
-
-        combined = pd.concat(all_bars, ignore_index=True)
-        combined = combined[
-            (combined["datetime"] >= start_date)
-            & (combined["datetime"] <= end_date)
+        # Filter to date range
+        df = df[
+            (df["datetime"] >= pd.Timestamp(start_date))
+            & (df["datetime"] <= pd.Timestamp(end_date))
         ]
-        combined = combined.drop_duplicates(subset=["datetime"])
-        combined = combined.sort_values("datetime").reset_index(drop=True)
+        df = df.drop_duplicates(subset=["datetime"])
+        df = df.sort_values("datetime").reset_index(drop=True)
 
         bars = [
             OHLCVBar(
@@ -129,7 +115,7 @@ class AlphaVantageClient:
                 close=row["close"],
                 volume=row["volume"],
             )
-            for _, row in combined.iterrows()
+            for _, row in df.iterrows()
         ]
 
-        return StockData(ticker=ticker, timeframe=interval, bars=bars)
+        return StockData(ticker=ticker, timeframe="daily", bars=bars)

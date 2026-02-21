@@ -169,21 +169,30 @@ def run_backtest(request: BacktestRequest) -> BacktestResponse:
     cerebro.broker.setcommission(commission=request.commission)
     cerebro.broker.set_slippage_perc(request.slippage / 100)
 
-    # Add observer for equity tracking
-    cerebro.addobserver(EquityObserver)
-
     # Run backtest
     results = cerebro.run()
     strategy = results[0]
 
-    # Extract equity curve
-    equity_values = []
-    equity_curve = []
-    for i, dt in enumerate(df.index):
-        equity = strategy.observers[0].lines.equity[i - len(df)]
-        if not math.isnan(equity):
-            equity_values.append(equity)
-            equity_curve.append(EquityPoint(datetime=dt, equity=equity))
+    # Extract equity curve from broker value
+    final_capital = cerebro.broker.getvalue()
+
+    # Simple equity curve based on trades
+    equity_values = [request.starting_capital]
+    equity_curve = [EquityPoint(datetime=df.index[0], equity=request.starting_capital)]
+
+    current_equity = request.starting_capital
+    for trade in strategy.trades:
+        current_equity += trade["pnl"]
+        equity_values.append(current_equity)
+        equity_curve.append(EquityPoint(
+            datetime=trade["exit_date"],
+            equity=current_equity
+        ))
+
+    # Add final point
+    if df.index[-1] != equity_curve[-1].datetime:
+        equity_values.append(final_capital)
+        equity_curve.append(EquityPoint(datetime=df.index[-1], equity=final_capital))
 
     # Calculate drawdown curve
     drawdown_curve = []

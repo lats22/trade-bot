@@ -57,8 +57,8 @@ export interface Ticker {
 
 export const DEFAULT_SETTINGS: BacktestRequest = {
   ticker: 'AAPL',
-  timeframe: '60min',
-  start_date: new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+  timeframe: 'daily',
+  start_date: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   end_date: new Date().toISOString().split('T')[0],
   risk_per_trade: 2,
   stop_loss: 2,

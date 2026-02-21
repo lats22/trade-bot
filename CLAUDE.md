@@ -66,7 +66,7 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 ### Stock Selection
 | Setting | Description |
 |---------|-------------|
-| Ticker [?] | Dropdown selector with 10 popular US stocks. Full company names displayed (e.g., "AAPL - Apple Inc."). Stocks: AAPL, MSFT, GOOGL, AMZN, TSLA, META, NVDA, JPM, V, JNJ. |
+| Ticker [?] | Searchable dropdown with 50 popular US stocks. Type to filter by ticker or company name. Full company names displayed (e.g., "AAPL - Apple Inc."). After backtest, company name shown in Performance Metrics header. |
 
 ### Timeframe
 | Setting | Description |
@@ -80,12 +80,17 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 | End Date [?] | End of backtest period. Use today's date for most recent data. |
 | Last X Months [?] | Alternative to custom dates. Automatically calculates period from today backwards. |
 
+### Strategy Direction
+| Setting | Description |
+|---------|-------------|
+| Strategy Direction [?] | Trading direction mode. **Long Only**: Buy low, sell high (traditional). **Short Only**: Sell high, buy low (profit from price drops). **Long & Short**: Trade both directions based on signals. |
+
 ### Risk Management
 | Setting | Description |
 |---------|-------------|
 | Risk per Trade [?] | Maximum percentage of capital risked on each trade. 1-2% is conservative, 5%+ is aggressive. Used for position sizing calculations. |
-| Stop Loss [?] | Percentage below entry price to exit losing trade. Protects capital. 2% = sell if price drops 2% from entry. |
-| Take Profit [?] | Percentage above entry price to exit winning trade. Locks in gains. 4% = sell if price rises 4% from entry. |
+| Stop Loss [?] | Percentage below entry price to exit losing trade (long) or above entry (short). Protects capital. 2% = exit if price moves 2% against position. |
+| Take Profit [?] | Percentage above entry price to exit winning trade (long) or below entry (short). Locks in gains. 4% = exit if price moves 4% in favor. |
 
 ### Position Sizing
 | Setting | Description |
@@ -115,7 +120,8 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 
 ### Core Features (Original Design)
 1. **Settings Card** - Adjust all parameters via web UI with [?] tooltips
-   - Stock dropdown with 10 popular US stocks and full company names
+   - Searchable stock dropdown with 50 popular US stocks (type to filter)
+   - Full company names displayed in dropdown and Performance Metrics
    - Run Backtest button positioned at top of Settings panel for quick access
    - Solid tooltip backgrounds for better readability
 2. **Equity Curve** - Interactive Plotly chart with entry/exit markers
@@ -127,18 +133,19 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 8. **Dark Mode** - Toggle with OS preference detection
 9. **Mobile Responsive** - Collapsible settings, stacked layout
 
-### Advanced Features (From Industry Research)
+### Implemented Advanced Features
+| Feature | Description | Status |
+|---------|-------------|--------|
+| **Short Selling** | Trade both directions - Long Only, Short Only, or Long & Short. Short entry: Price < VWAP AND Price < MA AND Volume spike. Short exit: Stop loss (price rises) or take profit (price drops). | Implemented |
+| **Monte Carlo Simulation** | Runs 1000 randomized trade sequence simulations. Shows median, best, worst case returns with 5th/95th percentile confidence interval. Displays max drawdown distribution. | Implemented |
+| **Walk-Forward Testing** | Splits data into 5 rolling windows. Tests strategy consistency across time periods. Shows per-window returns and overall consistency %. Helps detect overfitting. | Implemented |
+| **Slippage Modeling** | Simulate real execution price differences | Implemented |
+| **Commission/Fees** | Include broker fees in P&L calculation | Implemented |
+
+### Planned Features (From Industry Research)
 | Feature | Description | Source |
 |---------|-------------|--------|
-| **Slippage Modeling** | Simulate real execution price differences | [NewTrading](https://www.newtrading.io/backtesting-software/) |
-| **Commission/Fees** | Include broker fees in P&L calculation | [QuantConnect](https://www.quantconnect.com/) |
-| **Monte Carlo Simulation** | Run 1000+ random variations to test strategy robustness | [QuantConnect](https://www.quantconnect.com/) |
-| **Walk-Forward Testing** | Test on rolling windows to prevent overfitting | [LuxAlgo](https://www.luxalgo.com/blog/backtesting-software-ranked-for-retail-quants/) |
 | **Paper Trading Mode** | Forward-test with live data before real money | [NewTrading](https://www.newtrading.io/backtesting-software/) |
-| **Drawdown Chart** | Visual timeline of portfolio drawdowns | [NautilusTrader](https://nautilustrader.io/) |
-| **Win/Loss Streaks** | Track consecutive wins/losses | [TuringTrader](https://www.turingtrader.org/) |
-| **Profit Factor** | Gross profit / gross loss ratio | [QuantConnect](https://www.quantconnect.com/) |
-| **Risk/Reward Ratio** | Average win / average loss | Standard metric |
 | **Parameter Heatmap** | Visual grid showing which parameter combos work best | [QuantConnect](https://www.quantconnect.com/) |
 
 ### Performance Metrics Displayed
@@ -173,8 +180,14 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 │  [Run Backtest]         │  ← Button at top for quick access
 │                         │
 │  STOCK                  │
-│  [AAPL - Apple Inc. ▼]  │  ← Dropdown with company names
+│  [🔍 Search stocks...  ]│  ← Searchable dropdown (50 stocks)
+│  [AAPL - Apple Inc. ▼]  │
 │                    [?]  │
+│                         │
+│  STRATEGY DIRECTION     │
+│  ○ Long Only       [?]  │
+│  ○ Short Only      [?]  │
+│  ● Long & Short    [?]  │
 │                         │
 │  TIMEFRAME              │
 │  Candle: [1h ▼]    [?]  │

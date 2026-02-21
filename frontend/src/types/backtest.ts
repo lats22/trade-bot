@@ -1,5 +1,6 @@
 export interface BacktestRequest {
   ticker: string
+  strategy_direction: 'long' | 'short' | 'both'
   timeframe: string
   start_date: string
   end_date: string
@@ -42,16 +43,52 @@ export interface EquityPoint {
   equity: number
 }
 
+export interface MonteCarloResult {
+  simulations: number
+  median_return: number
+  best_return: number
+  worst_return: number
+  percentile_5: number
+  percentile_95: number
+  median_max_drawdown: number
+  worst_max_drawdown: number
+  return_distribution: {
+    values: number[]
+    labels: string[]
+  }
+}
+
+export interface WalkForwardWindow {
+  window: number
+  start_date: string
+  end_date: string
+  train_size: number
+  test_size: number
+  return_pct: number
+  profitable: boolean
+}
+
+export interface WalkForwardResult {
+  num_windows: number
+  windows: WalkForwardWindow[]
+  overall_consistency: number
+  avg_return: number
+  profitable_windows: number
+}
+
 export interface BacktestResponse {
   request: BacktestRequest
   metrics: BacktestMetrics
   equity_curve: EquityPoint[]
   drawdown_curve: EquityPoint[]
   trades: TradeRecord[]
+  monte_carlo?: MonteCarloResult
+  walk_forward?: WalkForwardResult
 }
 
 export const DEFAULT_SETTINGS: BacktestRequest = {
   ticker: 'AAPL',
+  strategy_direction: 'long',
   timeframe: 'daily',
   start_date: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
   end_date: new Date().toISOString().split('T')[0],

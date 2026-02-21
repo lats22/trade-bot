@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BacktestRequest } from '../types/backtest'
 import { Tooltip } from './Tooltip'
+import { StockSelector } from './StockSelector'
 import './SettingsCard.css'
 
 interface SettingsCardProps {
@@ -12,6 +13,7 @@ interface SettingsCardProps {
 
 const TOOLTIPS = {
   ticker: 'Stock symbol to backtest (e.g., AAPL, TSLA). Only US stocks supported.',
+  strategyDirection: 'Long: profit when price rises. Short: profit when price falls. Both: trade in either direction based on market conditions.',
   timeframe: 'Time period for each candlestick. Shorter = more trades, more noise.',
   startDate: 'Beginning of backtest period. Earlier = more data but slower.',
   endDate: 'End of backtest period. Use today for most recent data.',
@@ -64,20 +66,27 @@ export function SettingsCard({
                 Ticker
                 <Tooltip text={TOOLTIPS.ticker} />
               </label>
-              <select
+              <StockSelector
                 value={settings.ticker}
-                onChange={(e) => updateSetting('ticker', e.target.value)}
+                onChange={(ticker) => updateSetting('ticker', ticker)}
+              />
+            </div>
+          </div>
+
+          <div className="settings-section">
+            <h3>Strategy</h3>
+            <div className="setting-row">
+              <label>
+                Direction
+                <Tooltip text={TOOLTIPS.strategyDirection} />
+              </label>
+              <select
+                value={settings.strategy_direction}
+                onChange={(e) => updateSetting('strategy_direction', e.target.value as 'long' | 'short' | 'both')}
               >
-                <option value="AAPL">AAPL - Apple Inc.</option>
-                <option value="MSFT">MSFT - Microsoft Corp.</option>
-                <option value="GOOGL">GOOGL - Alphabet Inc.</option>
-                <option value="AMZN">AMZN - Amazon.com Inc.</option>
-                <option value="TSLA">TSLA - Tesla Inc.</option>
-                <option value="META">META - Meta Platforms Inc.</option>
-                <option value="NVDA">NVDA - NVIDIA Corp.</option>
-                <option value="JPM">JPM - JPMorgan Chase</option>
-                <option value="V">V - Visa Inc.</option>
-                <option value="JNJ">JNJ - Johnson & Johnson</option>
+                <option value="long">Long Only</option>
+                <option value="short">Short Only</option>
+                <option value="both">Long & Short</option>
               </select>
             </div>
           </div>

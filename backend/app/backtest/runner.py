@@ -1,5 +1,6 @@
 """Backtest runner using Backtrader."""
 from datetime import datetime
+import logging
 import math
 
 import backtrader as bt
@@ -12,8 +13,12 @@ from app.backtest.schemas import (
     EquityPoint,
     TradeRecord,
 )
+from app.backtest.monte_carlo import run_monte_carlo
+from app.backtest.walk_forward import run_walk_forward
 from app.data.alpha_vantage import AlphaVantageClient
 from app.strategies.vwap_ma_volume import VWAPMAVolumeStrategy
+
+logger = logging.getLogger(__name__)
 
 
 class EquityObserver(bt.Observer):
@@ -162,6 +167,7 @@ def run_backtest(request: BacktestRequest) -> BacktestResponse:
         position_type=request.position_type,
         lot_size=request.lot_size,
         percent_capital=request.percent_capital / 100,
+        strategy_direction=request.strategy_direction,
     )
 
     # Broker settings
@@ -213,6 +219,7 @@ def run_backtest(request: BacktestRequest) -> BacktestResponse:
             size=t["size"],
             pnl=round(t["pnl"], 2),
             pnl_percent=round(t["pnl_percent"], 2),
+            trade_type=t.get("trade_type", "LONG"),
         )
         for t in strategy.trades
     ]
@@ -226,10 +233,30 @@ def run_backtest(request: BacktestRequest) -> BacktestResponse:
         equity_values,
     )
 
+    # Run Monte Carlo simulation
+    logger.info(f"Running Monte Carlo simulation for {len(trades)} trades")
+    monte_carlo_results = run_monte_carlo(
+        trades=trades,
+        starting_capital=request.starting_capital,
+        num_simulations=1000
+    )
+
+    # Run Walk-Forward analysis
+    logger.info(f"Running walk-forward analysis on {len(df)} data points")
+    walk_forward_results = run_walk_forward(
+        df=df,
+        strategy_func=None,  # MVP: use price-based analysis
+        strategy_params={},
+        num_windows=5,
+        train_pct=0.8
+    )
+
     return BacktestResponse(
         request=request,
         metrics=metrics,
         equity_curve=equity_curve,
         drawdown_curve=drawdown_curve,
         trades=trades,
+        monte_carlo=monte_carlo_results,
+        walk_forward=walk_forward_results,
     )

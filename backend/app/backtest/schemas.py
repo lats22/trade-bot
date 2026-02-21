@@ -20,6 +20,9 @@ class BacktestRequest(BaseModel):
     starting_capital: float = Field(default=10000.0, ge=100.0)
     slippage: float = Field(default=0.1, ge=0.0, le=5.0)
     commission: float = Field(default=1.0, ge=0.0, le=50.0)
+    strategy_direction: Literal["long", "short", "both"] = Field(
+        default="long", description="Trading direction: long, short, or both"
+    )
 
 
 class TradeRecord(BaseModel):
@@ -31,7 +34,7 @@ class TradeRecord(BaseModel):
     size: int
     pnl: float
     pnl_percent: float
-    trade_type: str = "BUY"
+    trade_type: Literal["LONG", "SHORT"] = "LONG"
 
 
 class BacktestMetrics(BaseModel):
@@ -53,6 +56,42 @@ class EquityPoint(BaseModel):
     equity: float
 
 
+class MonteCarloResult(BaseModel):
+    """Monte Carlo simulation results."""
+    simulations: int
+    median_return: float
+    best_return: float
+    worst_return: float
+    percentile_5: float
+    percentile_95: float
+    median_max_drawdown: float
+    worst_max_drawdown: float
+    return_distribution: dict
+
+
+class WalkForwardWindow(BaseModel):
+    """Single walk-forward window result."""
+    window: int
+    start_date: str
+    end_date: str
+    train_end_date: str
+    test_start_date: str
+    train_size: int
+    test_size: int
+    return_pct: float
+    profitable: bool
+
+
+class WalkForwardResult(BaseModel):
+    """Walk-forward analysis results."""
+    num_windows: int
+    windows: list[WalkForwardWindow]
+    overall_consistency: float
+    avg_return: float
+    profitable_windows: int
+    train_pct: float
+
+
 class BacktestResponse(BaseModel):
     """Backtest results."""
     request: BacktestRequest
@@ -60,3 +99,5 @@ class BacktestResponse(BaseModel):
     equity_curve: list[EquityPoint]
     drawdown_curve: list[EquityPoint]
     trades: list[TradeRecord]
+    monte_carlo: Optional[MonteCarloResult] = None
+    walk_forward: Optional[WalkForwardResult] = None

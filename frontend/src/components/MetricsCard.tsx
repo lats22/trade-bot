@@ -1,9 +1,11 @@
 import { BacktestMetrics } from '../types/backtest'
 import { Tooltip } from './Tooltip'
+import { STOCK_NAMES } from './StockSelector'
 import './MetricsCard.css'
 
 interface MetricsCardProps {
   metrics: BacktestMetrics | null
+  ticker?: string
 }
 
 const METRIC_TOOLTIPS = {
@@ -18,7 +20,7 @@ const METRIC_TOOLTIPS = {
   worstStreak: 'Worst Streak: Longest consecutive losing trades. Shows the maximum number of losses in a row you experienced.',
 }
 
-export function MetricsCard({ metrics }: MetricsCardProps) {
+export function MetricsCard({ metrics, ticker }: MetricsCardProps) {
   if (!metrics) {
     return (
       <div className="metrics-card empty">
@@ -41,6 +43,13 @@ export function MetricsCard({ metrics }: MetricsCardProps) {
 
   return (
     <div className="metrics-card">
+      {ticker && (
+        <div className="stock-header">
+          <span className="stock-ticker">{ticker}</span>
+          <span className="stock-separator"> - </span>
+          <span className="stock-name">{STOCK_NAMES[ticker] || ticker}</span>
+        </div>
+      )}
       <h3>Performance Metrics</h3>
       <div className="metrics-grid">
         <div className="metric">

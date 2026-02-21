@@ -17,7 +17,7 @@ function App() {
   const [result, setResult] = useState<BacktestResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [chartTab, setChartTab] = useState<'equity' | 'drawdown'>('equity')
+  const [chartTab, setChartTab] = useState<'equity' | 'drawdown' | 'montecarlo' | 'walkforward'>('equity')
 
   useEffect(() => {
     const root = document.documentElement
@@ -101,7 +101,7 @@ function App() {
         </aside>
 
         <section className="content">
-          <MetricsCard metrics={result?.metrics || null} />
+          <MetricsCard metrics={result?.metrics || null} ticker={result ? settings.ticker : undefined} />
 
           <EquityChart
             equityCurve={result?.equity_curve || []}
@@ -110,6 +110,8 @@ function App() {
             activeTab={chartTab}
             onTabChange={setChartTab}
             darkMode={darkMode}
+            monteCarlo={result?.monte_carlo}
+            walkForward={result?.walk_forward}
           />
 
           <TradeLog

@@ -14,6 +14,28 @@
   opacity: 0.6;
 }
 
+.stock-header {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.stock-ticker {
+  color: var(--primary-color);
+}
+
+.stock-separator {
+  color: var(--text-color);
+  opacity: 0.5;
+}
+
+.stock-name {
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
 .metrics-card h3 {
   font-size: 1rem;
   margin-bottom: 1rem;

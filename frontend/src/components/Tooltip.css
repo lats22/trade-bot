@@ -25,8 +25,8 @@
 
 .tooltip-content {
   position: fixed;
-  background: #1a1a1a;
-  border: 1px solid #444;
+  background-color: #1a1a1a !important;
+  border: 2px solid #666 !important;
   border-radius: 6px;
   padding: 0.75rem;
   font-size: 0.8rem;
@@ -34,9 +34,10 @@
   width: 250px;
   max-width: 90vw;
   z-index: 9999;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  color: #e0e0e0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  color: #ffffff !important;
   text-transform: none;
   font-weight: normal;
   text-align: left;
+  opacity: 1 !important;
 }

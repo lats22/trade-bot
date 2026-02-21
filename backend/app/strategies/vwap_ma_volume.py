@@ -1,7 +1,11 @@
 """VWAP + MA200 + Volume strategy."""
+import logging
+
 import backtrader as bt
 
 from app.strategies.indicators import VWAP
+
+logger = logging.getLogger(__name__)
 
 
 class VWAPMAVolumeStrategy(bt.Strategy):
@@ -43,7 +47,7 @@ class VWAPMAVolumeStrategy(bt.Strategy):
     def log(self, txt):
         """Log message with datetime."""
         dt = self.data.datetime.datetime(0)
-        print(f"{dt.isoformat()} - {txt}")
+        logger.info(f"{dt.isoformat()} - {txt}")
 
     def notify_order(self, order):
         """Handle order notifications."""

@@ -87,6 +87,12 @@
   color: var(--text-color);
 }
 
+.timeframe-value {
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-color);
+}
+
 .run-backtest-btn {
   width: 100%;
   padding: 0.75rem;

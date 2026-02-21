@@ -50,11 +50,6 @@ export interface BacktestResponse {
   trades: TradeRecord[]
 }
 
-export interface Ticker {
-  symbol: string
-  name: string
-}
-
 export const DEFAULT_SETTINGS: BacktestRequest = {
   ticker: 'AAPL',
   timeframe: 'daily',

@@ -19,7 +19,7 @@ def mock_api_key():
 def mock_response():
     """Mock API response."""
     return {
-        "Time Series (60min)": {
+        "Time Series (Daily)": {
             "2024-01-02 10:00:00": {
                 "1. open": "100.00",
                 "2. high": "101.00",
@@ -64,7 +64,7 @@ def test_fetch_intraday_parses_response(mock_api_key, mock_response, tmp_path):
             )
 
             assert data.ticker == "AAPL"
-            assert data.timeframe == "60min"
+            assert data.timeframe == "daily"  # Free tier uses daily data
             assert len(data.bars) == 2
             assert data.bars[0].close == 100.50
             assert data.bars[1].close == 101.50

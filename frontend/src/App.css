@@ -81,3 +81,7 @@
     width: 100%;
   }
 }
+
+@media print {
+  .theme-toggle { display: none; }
+}

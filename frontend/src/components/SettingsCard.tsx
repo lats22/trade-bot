@@ -47,6 +47,14 @@ export function SettingsCard({
         <button className="collapse-btn">{isCollapsed ? '▼' : '▲'}</button>
       </div>
 
+      <button
+        className="run-backtest-btn"
+        onClick={onRunBacktest}
+        disabled={isLoading}
+      >
+        {isLoading ? 'Running...' : 'Run Backtest'}
+      </button>
+
       {!isCollapsed && (
         <div className="settings-content">
           <div className="settings-section">
@@ -56,11 +64,21 @@ export function SettingsCard({
                 Ticker
                 <Tooltip text={TOOLTIPS.ticker} />
               </label>
-              <input
-                type="text"
+              <select
                 value={settings.ticker}
-                onChange={(e) => updateSetting('ticker', e.target.value.toUpperCase())}
-              />
+                onChange={(e) => updateSetting('ticker', e.target.value)}
+              >
+                <option value="AAPL">AAPL - Apple Inc.</option>
+                <option value="MSFT">MSFT - Microsoft Corp.</option>
+                <option value="GOOGL">GOOGL - Alphabet Inc.</option>
+                <option value="AMZN">AMZN - Amazon.com Inc.</option>
+                <option value="TSLA">TSLA - Tesla Inc.</option>
+                <option value="META">META - Meta Platforms Inc.</option>
+                <option value="NVDA">NVDA - NVIDIA Corp.</option>
+                <option value="JPM">JPM - JPMorgan Chase</option>
+                <option value="V">V - Visa Inc.</option>
+                <option value="JNJ">JNJ - Johnson & Johnson</option>
+              </select>
             </div>
           </div>
 
@@ -69,14 +87,9 @@ export function SettingsCard({
             <div className="setting-row">
               <label>
                 Candle
-                <Tooltip text={TOOLTIPS.timeframe} />
+                <Tooltip text="Only daily timeframe available with Alpha Vantage free tier. Upgrade API for intraday data." />
               </label>
-              <select
-                value={settings.timeframe}
-                onChange={(e) => updateSetting('timeframe', e.target.value)}
-              >
-                <option value="daily">Daily</option>
-              </select>
+              <span className="timeframe-value">Daily</span>
             </div>
           </div>
 
@@ -265,14 +278,6 @@ export function SettingsCard({
           </div>
         </div>
       )}
-
-      <button
-        className="run-backtest-btn"
-        onClick={onRunBacktest}
-        disabled={isLoading}
-      >
-        {isLoading ? 'Running...' : 'Run Backtest'}
-      </button>
     </div>
   )
 }

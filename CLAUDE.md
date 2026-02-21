@@ -66,7 +66,7 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 ### Stock Selection
 | Setting | Description |
 |---------|-------------|
-| Ticker [?] | Stock symbol to backtest (e.g., AAPL, TSLA, MSFT). Only US stocks supported via Alpha Vantage. |
+| Ticker [?] | Dropdown selector with 10 popular US stocks. Full company names displayed (e.g., "AAPL - Apple Inc."). Stocks: AAPL, MSFT, GOOGL, AMZN, TSLA, META, NVDA, JPM, V, JNJ. |
 
 ### Timeframe
 | Setting | Description |
@@ -115,6 +115,9 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 
 ### Core Features (Original Design)
 1. **Settings Card** - Adjust all parameters via web UI with [?] tooltips
+   - Stock dropdown with 10 popular US stocks and full company names
+   - Run Backtest button positioned at top of Settings panel for quick access
+   - Solid tooltip backgrounds for better readability
 2. **Equity Curve** - Interactive Plotly chart with entry/exit markers
 3. **Trade Log** - Table with entry/exit points, P&L, click to view trade chart
 4. **Trade Visualization** - Individual trade charts showing indicators and entry/exit
@@ -167,8 +170,11 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 ┌─────────────────────────┐
 │  ⚙️ SETTINGS            │
 ├─────────────────────────┤
+│  [Run Backtest]         │  ← Button at top for quick access
+│                         │
 │  STOCK                  │
-│  Ticker: [AAPL  ▼] [?]  │  ← [?] shows tooltip on hover
+│  [AAPL - Apple Inc. ▼]  │  ← Dropdown with company names
+│                    [?]  │
 │                         │
 │  TIMEFRAME              │
 │  Candle: [1h ▼]    [?]  │
@@ -200,7 +206,6 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 │  ○ Save locally    [?]  │
 │  ○ Export to file  [?]  │
 │                         │
-│  [Run Backtest]         │
 │  [Paper Trade]          │
 └─────────────────────────┘
 ```
@@ -208,6 +213,7 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 ### Tooltip Behavior
 - Desktop: Show on hover, hide on mouse leave
 - Mobile: Show on tap, hide on tap elsewhere
+- Solid background color (no transparency) for better readability
 - Include "Learn more" link to docs for complex topics
 
 ## API Endpoints
@@ -287,8 +293,10 @@ PIN_CODE=your_pin_here
 ## Docker Security
 
 - No hardcoded credentials (use required env vars)
-- Pinned image versions
+- Pinned image versions (node:20-alpine, python:3.11-slim, nginx:1.25-alpine)
 - Health checks on backend
+- CSP security headers in nginx configuration
+- CORS environment configuration
 - No database ports exposed (no database needed)
 
 ## Research Sources

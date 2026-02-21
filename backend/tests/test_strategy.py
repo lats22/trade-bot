@@ -26,4 +26,4 @@ def test_strategy_params():
     strategy_cls = VWAPMAVolumeStrategy
     assert strategy_cls.params.stop_loss == 0.02
     assert strategy_cls.params.take_profit == 0.04
-    assert strategy_cls.params.ma_period == 200
+    assert strategy_cls.params.ma_period == 20

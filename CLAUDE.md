@@ -254,14 +254,17 @@ docker compose logs -f
 # Rebuild after code changes
 docker compose up -d --build
 
+# Full rebuild (clear cache)
+docker compose down && docker compose build --no-cache && docker compose up -d
+
 # Stop all services
 docker compose down
 
 # Access dashboard
-http://localhost:3000
+http://localhost:3100
 
 # API endpoint
-http://localhost:5000
+http://localhost:5100
 ```
 
 ## Environment Variables
@@ -272,12 +275,15 @@ Required in `.env`:
 PROJECT_NAME=trade-bot
 
 # Ports
-FRONTEND_PORT=3000
-BACKEND_PORT=5000
+FRONTEND_PORT=3100
+BACKEND_PORT=5100
 PLAYWRIGHT_PORT=8934
 
 # Alpha Vantage API
 ALPHA_VANTAGE_API_KEY=your_key_here
+
+# CORS (optional - defaults to localhost:3000,3100)
+ALLOWED_ORIGINS=http://localhost:3100
 
 # VPS only (for later deployment)
 PIN_CODE=your_pin_here
@@ -306,11 +312,24 @@ PIN_CODE=your_pin_here
 ## Docker Security
 
 - No hardcoded credentials (use required env vars)
-- Pinned image versions (node:20-alpine, python:3.11-slim, nginx:1.25-alpine)
+- Pinned image versions (node:20.11-alpine, python:3.11.7-slim, nginx:1.27-alpine)
 - Health checks on backend
 - CSP security headers in nginx configuration
-- CORS environment configuration
+- CORS environment configuration via ALLOWED_ORIGINS
 - No database ports exposed (no database needed)
+
+## Development Notes
+
+### Stock Data
+- Uses 50 popular US stocks built into StockSelector component
+- No external tickers API call needed (removed getTickers function)
+- Company names displayed in both dropdown and metrics header
+
+### Strategy Logic
+| Direction | Entry Condition | Exit Condition |
+|-----------|-----------------|----------------|
+| Long | Price > VWAP AND Price > MA AND Volume spike | Stop loss (price drops) OR Take profit (price rises) |
+| Short | Price < VWAP AND Price < MA AND Volume spike | Stop loss (price rises) OR Take profit (price drops) |
 
 ## Research Sources
 

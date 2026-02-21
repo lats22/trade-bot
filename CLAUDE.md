@@ -18,7 +18,7 @@ Stock backtesting system with web dashboard and TradingView signal export.
 
 ## Overview
 
-- **Purpose:** Backtest stock trading strategies using VWAP, MA200, and Volume indicators
+- **Purpose:** Backtest stock trading strategies using multiple technical analysis strategies
 - **Platform:** Python (Backtrader) + React PWA dashboard
 - **Data Source:** Alpha Vantage API (hourly intraday data)
 - **Output:** Performance metrics, equity curve, trade log, CSV export for TradingView
@@ -48,7 +48,7 @@ Trade_Bot/
 ├── backend/                # Python FastAPI + Backtrader
 │   ├── app/
 │   │   ├── api/           # FastAPI endpoints
-│   │   ├── strategies/    # Trading strategies (VWAP, MA, Volume)
+│   │   ├── strategies/    # Trading strategies (5 strategies)
 │   │   └── backtest/      # Backtrader runner
 │   └── Dockerfile
 ├── data/                   # Cached stock data (mounted volume)
@@ -136,17 +136,14 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 ### Implemented Advanced Features
 | Feature | Description | Status |
 |---------|-------------|--------|
-| **Short Selling** | Trade both directions - Long Only, Short Only, or Long & Short. Short entry: Price < VWAP AND Price < MA AND Volume spike. Short exit: Stop loss (price rises) or take profit (price drops). | Implemented |
-| **Monte Carlo Simulation** | Runs 1000 randomized trade sequence simulations. Shows median, best, worst case returns with 5th/95th percentile confidence interval. Displays max drawdown distribution. | Implemented |
-| **Walk-Forward Testing** | Splits data into 5 rolling windows. Tests strategy consistency across time periods. Shows per-window returns and overall consistency %. Helps detect overfitting. | Implemented |
-| **Slippage Modeling** | Simulate real execution price differences | Implemented |
-| **Commission/Fees** | Include broker fees in P&L calculation | Implemented |
-
-### Planned Features (From Industry Research)
-| Feature | Description | Source |
-|---------|-------------|--------|
-| **Paper Trading Mode** | Forward-test with live data before real money | [NewTrading](https://www.newtrading.io/backtesting-software/) |
-| **Parameter Heatmap** | Visual grid showing which parameter combos work best | [QuantConnect](https://www.quantconnect.com/) |
+| **Multiple Strategies** | 5 trading strategies available: VWAP+MA+Volume, SMA Crossover, RSI, MACD, Bollinger Bands. Each with description and strategy-specific indicators. | ✅ Implemented |
+| **Short Selling** | Trade both directions - Long Only, Short Only, or Long & Short. Entry/exit logic varies by strategy. | ✅ Implemented |
+| **Monte Carlo Simulation** | Runs 1000 randomized trade sequence simulations. Shows median, best, worst case returns with 5th/95th percentile confidence interval. Displays max drawdown distribution. | ✅ Implemented |
+| **Walk-Forward Testing** | Splits data into 5 rolling windows. Tests strategy consistency across time periods. Shows per-window returns and overall consistency %. Helps detect overfitting. | ✅ Implemented |
+| **Parameter Heatmap** | Visual 2D grid showing Stop Loss vs Take Profit parameter combinations. Color-coded by return (red=loss, yellow=neutral, green=profit). Highlights best parameter combination. | ✅ Implemented |
+| **Paper Trading Mode** | Simulated forward-testing with recent historical data. Tracks virtual positions, unrealized P&L, and trade history. Start/Stop buttons with session status display. | ✅ Implemented |
+| **Slippage Modeling** | Simulate real execution price differences | ✅ Implemented |
+| **Commission/Fees** | Include broker fees in P&L calculation | ✅ Implemented |
 
 ### Performance Metrics Displayed
 | Metric | Description |
@@ -233,13 +230,15 @@ Every setting has a [?] icon that shows an explanation tooltip on hover/click.
 
 | Endpoint | Method | Purpose |
 |----------|--------|---------|
-| `/api/backtest` | POST | Run backtest with settings |
-| `/api/backtest/monte-carlo` | POST | Run Monte Carlo simulation |
-| `/api/backtest/walk-forward` | POST | Run walk-forward test |
+| `/api/backtest` | POST | Run backtest with settings (includes Monte Carlo & Walk-Forward) |
+| `/api/backtest/heatmap` | POST | Run parameter optimization grid search |
 | `/api/paper-trade/start` | POST | Start paper trading session |
-| `/api/paper-trade/status` | GET | Get paper trading status |
-| `/api/tickers` | GET | List available stock tickers |
-| `/api/export/csv` | GET | Download signals CSV |
+| `/api/paper-trade/status/{id}` | GET | Get paper trading status |
+| `/api/paper-trade/sessions` | GET | List all paper trade sessions |
+| `/api/paper-trade/stop/{id}` | POST | Stop paper trading session |
+| `/api/strategies` | GET | List available trading strategies |
+| `/api/strategies/{name}` | GET | Get strategy details |
+| `/api/tickers` | GET | List popular stock tickers |
 | `/api/health` | GET | Health check |
 
 ## Commands
@@ -325,11 +324,14 @@ PIN_CODE=your_pin_here
 - No external tickers API call needed (removed getTickers function)
 - Company names displayed in both dropdown and metrics header
 
-### Strategy Logic
-| Direction | Entry Condition | Exit Condition |
-|-----------|-----------------|----------------|
-| Long | Price > VWAP AND Price > MA AND Volume spike | Stop loss (price drops) OR Take profit (price rises) |
-| Short | Price < VWAP AND Price < MA AND Volume spike | Stop loss (price rises) OR Take profit (price drops) |
+### Available Trading Strategies
+| Strategy | Indicators | Entry Logic |
+|----------|------------|-------------|
+| VWAP + MA + Volume | VWAP, SMA(20), Volume SMA | Long: Price > VWAP + MA + Volume spike. Short: Price < VWAP + MA + Volume spike |
+| SMA Crossover | SMA(10), SMA(30) | Long: Fast MA crosses above Slow MA. Short: Fast MA crosses below Slow MA |
+| RSI Strategy | RSI(14) | Long: RSI < 30 (oversold). Short: RSI > 70 (overbought) |
+| MACD Strategy | MACD(12,26,9) | Long: MACD crosses above Signal. Short: MACD crosses below Signal |
+| Bollinger Bands | BB(20,2) | Long: Price touches lower band. Short: Price touches upper band |
 
 ## Research Sources
 

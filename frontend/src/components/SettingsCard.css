@@ -93,6 +93,17 @@
   color: var(--text-color);
 }
 
+.strategy-description {
+  font-size: 0.75rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  padding: 0.5rem;
+  background: var(--bg-color);
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
 .run-backtest-btn {
   width: 100%;
   padding: 0.75rem;

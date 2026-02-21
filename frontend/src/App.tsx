@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { SettingsCard } from './components/SettingsCard'
 import { MetricsCard } from './components/MetricsCard'
-import { EquityChart } from './components/EquityChart'
+import { EquityChart, ChartTab } from './components/EquityChart'
 import { TradeLog } from './components/TradeLog'
-import { runBacktest } from './services/api'
-import { BacktestRequest, BacktestResponse, DEFAULT_SETTINGS } from './types/backtest'
+import { PaperTrading } from './components/PaperTrading'
+import { runBacktest, runHeatmap } from './services/api'
+import { BacktestRequest, BacktestResponse, HeatmapResult, DEFAULT_SETTINGS } from './types/backtest'
 import './App.css'
 
 function App() {
@@ -15,9 +16,10 @@ function App() {
   })
   const [settings, setSettings] = useState<BacktestRequest>(DEFAULT_SETTINGS)
   const [result, setResult] = useState<BacktestResponse | null>(null)
+  const [heatmapResult, setHeatmapResult] = useState<HeatmapResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [chartTab, setChartTab] = useState<'equity' | 'drawdown' | 'montecarlo' | 'walkforward'>('equity')
+  const [chartTab, setChartTab] = useState<ChartTab>('equity')
 
   useEffect(() => {
     const root = document.documentElement
@@ -35,8 +37,13 @@ function App() {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await runBacktest(settings)
-      setResult(response)
+      // Run backtest and heatmap in parallel
+      const [backtestResponse, heatmapResponse] = await Promise.all([
+        runBacktest(settings),
+        runHeatmap(settings).catch(() => null), // Heatmap is optional, don't fail if it errors
+      ])
+      setResult(backtestResponse)
+      setHeatmapResult(heatmapResponse)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Backtest failed')
     } finally {
@@ -112,12 +119,15 @@ function App() {
             darkMode={darkMode}
             monteCarlo={result?.monte_carlo}
             walkForward={result?.walk_forward}
+            heatmap={heatmapResult || result?.heatmap}
           />
 
           <TradeLog
             trades={result?.trades || []}
             onExportCSV={handleExportCSV}
           />
+
+          <PaperTrading settings={settings} darkMode={darkMode} />
         </section>
       </main>
     </div>

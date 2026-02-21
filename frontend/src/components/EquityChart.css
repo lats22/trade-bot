@@ -257,6 +257,59 @@
   font-weight: 600;
 }
 
+/* Heatmap Styles */
+.heatmap-content {
+  padding: 1rem 0;
+}
+
+.heatmap-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.heatmap-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  text-align: center;
+  background: var(--bg-color);
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+
+.heatmap-label {
+  font-size: 0.625rem;
+  color: var(--text-color);
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.heatmap-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.heatmap-value.positive {
+  color: #27ae60;
+}
+
+.heatmap-value.negative {
+  color: #e74c3c;
+}
+
+.heatmap-best-badge {
+  display: inline-block;
+  background: #27ae60;
+  color: white;
+  font-size: 0.625rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.25rem;
+}
+
 /* Mobile responsive */
 @media screen and (max-width: 576px) {
   .mc-stats-grid {
@@ -278,6 +331,22 @@
 
   .chart-tabs button {
     padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .heatmap-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .heatmap-stat {
+    padding: 0.5rem;
+  }
+
+  .heatmap-label {
+    font-size: 0.5625rem;
+  }
+
+  .heatmap-value {
     font-size: 0.875rem;
   }
 }

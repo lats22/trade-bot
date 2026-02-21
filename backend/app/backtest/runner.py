@@ -2,6 +2,7 @@
 from datetime import datetime
 import logging
 import math
+from typing import Type
 
 import backtrader as bt
 import pandas as pd
@@ -12,13 +13,51 @@ from app.backtest.schemas import (
     BacktestMetrics,
     EquityPoint,
     TradeRecord,
+    STRATEGY_NAMES,
 )
 from app.backtest.monte_carlo import run_monte_carlo
 from app.backtest.walk_forward import run_walk_forward
 from app.data.alpha_vantage import AlphaVantageClient
+
+# Import all strategies
 from app.strategies.vwap_ma_volume import VWAPMAVolumeStrategy
+from app.strategies.sma_crossover import SMACrossoverStrategy
+from app.strategies.rsi_strategy import RSIStrategy
+from app.strategies.macd_strategy import MACDStrategy
+from app.strategies.bollinger_bands import BollingerBandsStrategy
 
 logger = logging.getLogger(__name__)
+
+
+# Strategy registry mapping names to classes
+STRATEGY_REGISTRY: dict[str, Type[bt.Strategy]] = {
+    "vwap_ma_volume": VWAPMAVolumeStrategy,
+    "sma_crossover": SMACrossoverStrategy,
+    "rsi": RSIStrategy,
+    "macd": MACDStrategy,
+    "bollinger_bands": BollingerBandsStrategy,
+}
+
+
+def get_strategy_class(strategy_name: str) -> Type[bt.Strategy]:
+    """
+    Get the strategy class by name.
+
+    Args:
+        strategy_name: Name of the strategy
+
+    Returns:
+        Backtrader Strategy class
+
+    Raises:
+        ValueError: If strategy name is not found
+    """
+    if strategy_name not in STRATEGY_REGISTRY:
+        raise ValueError(
+            f"Unknown strategy: {strategy_name}. "
+            f"Available strategies: {list(STRATEGY_REGISTRY.keys())}"
+        )
+    return STRATEGY_REGISTRY[strategy_name]
 
 
 class EquityObserver(bt.Observer):
@@ -151,6 +190,10 @@ def run_backtest(request: BacktestRequest) -> BacktestResponse:
     ])
     df.set_index("datetime", inplace=True)
 
+    # Get strategy class
+    strategy_class = get_strategy_class(request.strategy_name)
+    logger.info(f"Running backtest with strategy: {request.strategy_name}")
+
     # Setup Backtrader
     cerebro = bt.Cerebro()
 
@@ -160,7 +203,7 @@ def run_backtest(request: BacktestRequest) -> BacktestResponse:
 
     # Add strategy
     cerebro.addstrategy(
-        VWAPMAVolumeStrategy,
+        strategy_class,
         stop_loss=request.stop_loss / 100,
         take_profit=request.take_profit / 100,
         risk_per_trade=request.risk_per_trade / 100,

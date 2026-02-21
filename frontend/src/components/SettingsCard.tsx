@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BacktestRequest } from '../types/backtest'
+import { BacktestRequest, STRATEGIES, StrategyName } from '../types/backtest'
 import { Tooltip } from './Tooltip'
 import { StockSelector } from './StockSelector'
 import './SettingsCard.css'
@@ -13,6 +13,7 @@ interface SettingsCardProps {
 
 const TOOLTIPS = {
   ticker: 'Stock symbol to backtest (e.g., AAPL, TSLA). Only US stocks supported.',
+  strategy: 'Trading strategy algorithm. Each uses different indicators and entry/exit rules.',
   strategyDirection: 'Long: profit when price rises. Short: profit when price falls. Both: trade in either direction based on market conditions.',
   timeframe: 'Time period for each candlestick. Shorter = more trades, more noise.',
   startDate: 'Beginning of backtest period. Earlier = more data but slower.',
@@ -75,6 +76,26 @@ export function SettingsCard({
 
           <div className="settings-section">
             <h3>Strategy</h3>
+            <div className="setting-row">
+              <label>
+                Algorithm
+                <Tooltip text={TOOLTIPS.strategy} />
+              </label>
+              <select
+                value={settings.strategy_name}
+                onChange={(e) => updateSetting('strategy_name', e.target.value as StrategyName)}
+                title={STRATEGIES.find((s) => s.name === settings.strategy_name)?.description}
+              >
+                {STRATEGIES.map((strategy) => (
+                  <option key={strategy.name} value={strategy.name} title={strategy.description}>
+                    {strategy.display_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="strategy-description">
+              {STRATEGIES.find((s) => s.name === settings.strategy_name)?.description}
+            </div>
             <div className="setting-row">
               <label>
                 Direction

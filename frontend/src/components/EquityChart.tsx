@@ -1,8 +1,8 @@
 import Plot from 'react-plotly.js'
-import { EquityPoint, TradeRecord, MonteCarloResult, WalkForwardResult } from '../types/backtest'
+import { EquityPoint, TradeRecord, MonteCarloResult, WalkForwardResult, HeatmapResult } from '../types/backtest'
 import './EquityChart.css'
 
-type ChartTab = 'equity' | 'drawdown' | 'montecarlo' | 'walkforward'
+export type ChartTab = 'equity' | 'drawdown' | 'montecarlo' | 'walkforward' | 'heatmap'
 
 interface EquityChartProps {
   equityCurve: EquityPoint[]
@@ -13,6 +13,7 @@ interface EquityChartProps {
   darkMode: boolean
   monteCarlo?: MonteCarloResult
   walkForward?: WalkForwardResult
+  heatmap?: HeatmapResult
 }
 
 export function EquityChart({
@@ -24,6 +25,7 @@ export function EquityChart({
   darkMode,
   monteCarlo,
   walkForward,
+  heatmap,
 }: EquityChartProps) {
   const colors = {
     bg: darkMode ? '#1e1e1e' : '#ffffff',
@@ -44,6 +46,7 @@ export function EquityChart({
           <button>Drawdown</button>
           <button>Monte Carlo</button>
           <button>Walk-Forward</button>
+          <button>Heatmap</button>
         </div>
         <div className="empty-message">Run a backtest to see charts</div>
       </div>
@@ -183,6 +186,102 @@ export function EquityChart({
     )
   }
 
+  const renderHeatmapContent = () => {
+    if (!heatmap) {
+      return <div className="tab-placeholder">Heatmap analysis not available. Run backtest with Heatmap enabled.</div>
+    }
+
+    // Build z-matrix for heatmap
+    const stopLossValues = heatmap.stop_loss_values
+    const takeProfitValues = heatmap.take_profit_values
+    const zMatrix: number[][] = []
+
+    for (let i = 0; i < stopLossValues.length; i++) {
+      const row: number[] = []
+      for (let j = 0; j < takeProfitValues.length; j++) {
+        const point = heatmap.points.find(
+          (p) => p.stop_loss === stopLossValues[i] && p.take_profit === takeProfitValues[j]
+        )
+        row.push(point?.return_pct ?? 0)
+      }
+      zMatrix.push(row)
+    }
+
+    return (
+      <div className="heatmap-content">
+        <div className="heatmap-stats">
+          <div className="heatmap-stat">
+            <span className="heatmap-label">Best Return</span>
+            <span className={`heatmap-value ${heatmap.best_return >= 0 ? 'positive' : 'negative'}`}>
+              {heatmap.best_return >= 0 ? '+' : ''}{heatmap.best_return.toFixed(2)}%
+            </span>
+          </div>
+          <div className="heatmap-stat">
+            <span className="heatmap-label">Best Stop Loss</span>
+            <span className="heatmap-value">{heatmap.best_params.stop_loss}%</span>
+          </div>
+          <div className="heatmap-stat">
+            <span className="heatmap-label">Best Take Profit</span>
+            <span className="heatmap-value">{heatmap.best_params.take_profit}%</span>
+          </div>
+          <div className="heatmap-stat">
+            <span className="heatmap-label">Tested</span>
+            <span className="heatmap-value">{heatmap.parameters_tested} combos</span>
+          </div>
+        </div>
+
+        <Plot
+          data={[
+            {
+              z: zMatrix,
+              x: takeProfitValues.map((v) => `${v}%`),
+              y: stopLossValues.map((v) => `${v}%`),
+              type: 'heatmap',
+              colorscale: [
+                [0, '#e74c3c'],
+                [0.5, '#f39c12'],
+                [1, '#27ae60'],
+              ],
+              colorbar: {
+                title: { text: 'Return %' },
+                ticksuffix: '%',
+              },
+              hovertemplate:
+                'Take Profit: %{x}<br>Stop Loss: %{y}<br>Return: %{z:.2f}%<extra></extra>',
+            },
+          ]}
+          layout={{
+            autosize: true,
+            margin: { l: 70, r: 20, t: 20, b: 50 },
+            paper_bgcolor: colors.bg,
+            plot_bgcolor: colors.bg,
+            font: { color: colors.text },
+            xaxis: {
+              title: { text: 'Take Profit %' },
+              tickangle: -45,
+            },
+            yaxis: {
+              title: { text: 'Stop Loss %' },
+            },
+            annotations: [
+              {
+                x: `${heatmap.best_params.take_profit}%`,
+                y: `${heatmap.best_params.stop_loss}%`,
+                text: 'BEST',
+                showarrow: true,
+                arrowhead: 2,
+                arrowcolor: colors.text,
+                font: { color: colors.text, size: 12 },
+              },
+            ],
+          }}
+          config={{ responsive: true, displayModeBar: false }}
+          style={{ width: '100%', height: '300px' }}
+        />
+      </div>
+    )
+  }
+
   const renderChartContent = () => {
     if (activeTab === 'montecarlo') {
       return renderMonteCarloContent()
@@ -190,6 +289,10 @@ export function EquityChart({
 
     if (activeTab === 'walkforward') {
       return renderWalkForwardContent()
+    }
+
+    if (activeTab === 'heatmap') {
+      return renderHeatmapContent()
     }
 
     return (
@@ -277,6 +380,12 @@ export function EquityChart({
           onClick={() => onTabChange('walkforward')}
         >
           Walk-Forward
+        </button>
+        <button
+          className={activeTab === 'heatmap' ? 'active' : ''}
+          onClick={() => onTabChange('heatmap')}
+        >
+          Heatmap
         </button>
       </div>
       {renderChartContent()}
